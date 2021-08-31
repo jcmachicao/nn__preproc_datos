@@ -1,4 +1,4 @@
 # Preprocesamiento de Datos
 ### Colección Redes Neuronales
 GestioDinámica
-# nn__preproc_datos
+Repositorio: nn__preproc_datos
