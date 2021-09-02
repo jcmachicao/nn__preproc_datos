@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import streamlit as st
-import torch
 import pandas as pd
 import numpy as np
 import base64
@@ -19,56 +18,64 @@ st.write('Este aplicativo procesa la base de datos de prueba para predecir el \
 
 st.subheader('Carga de Datos')
 
-st.write('*Instrucciones*: El archivo a cargar debe llamarse **data.xlsx** y debe \
-         contener dos hojas.\
+st.write('*Instrucciones*: El archivo a cargar puede tener cualquier nombre con \
+         la extensión **___.xlsx** y debe contener dos hojas.\
          Una primera llamada **data_orig** y una segunda llamada **data_futura**. \
          Ambas deben tener la misma estructura de columnas y la variable de \
          salida debe denominarse como **out** (en el encabezado de columna).')
 
+def prep_data_nn(data, data_fut):
+    
+    data['futuro'] = False
+    data_fut['futuro'] = True
+    data_tot = pd.concat([data, data_fut], axis=0)
+    data_tot = data_tot.drop(['out'], axis=1)
+    
+    cats, nums = [], []
+    for col, dt in zip(data_tot.columns, data_tot.dtypes):
+        if dt == 'object': cats.append(col) 
+        else: nums.append(col)
+    
+    unicos = []
+    for col in cats:
+        unicos.append(list(data_tot[col].unique()))
+    
+    data_tot_wide_cats = pd.get_dummies(data_tot[cats], drop_first=True)
+    data_tot_wide = pd.concat([data_tot[nums], data_tot_wide_cats], axis=1)
+    data_norm = data_tot_wide / np.max(data_tot_wide, axis=0)
+    data_norm_in = data_norm[data_norm.futuro == 0]
+    data_norm_in = data_norm_in.drop(['futuro'], axis=1)
+    X_in_cols = data_norm_in.columns
+    data_y = pd.factorize(data.out)
+    y_cats = data_y[1]
+    X_in = np.array(data_norm_in, dtype='float64')
+    y_in = np.array(data_y[0], dtype='float32').reshape(-1,1)
+   
+    return X_in, y_in, X_in_cols, y_cats, unicos, cats, nums
+
 file = st.file_uploader('Seleccione un archivo')
 
 if file is not None: 
-    data = pd.read_excel(file, sheet_name='data_orig')
-    data_fut = pd.read_excel(file, sheet_name='data_futura')
+    
+    @st.cache(allow_output_mutation=True)
+    def load(file):
+        data = pd.read_excel(file, sheet_name='data_orig')
+        data_fut = pd.read_excel(file, sheet_name='data_futura')
+        return data, data_fut
+    
+    data, data_fut = load(file)
         
     st.write('Filas, Columnas de Data de Entrenamiento: ', data.shape)
     st.write('Filas, Columnas de Data Potencial Futura: ', data_fut.shape)
     
-    #st.bar_chart(data.out, width=50, height=200)
-    #st.bar_chart(data_fut.out, width=50, height=200)
-    
-    def prep_data_nn(data, data_fut):
-        
-        data['futuro'] = False
-        data_fut['futuro'] = True
-        data_tot = pd.concat([data, data_fut], axis=0)
-        data_tot = data_tot.drop(['out'], axis=1)
-        
-        cats, nums = [], []
-        for col, dt in zip(data_tot.columns, data_tot.dtypes):
-            if dt == 'object': cats.append(col) 
-            else: nums.append(col)
-        
-        unicos = []
-        for col in cats:
-            unicos.append(list(data_tot[col].unique()))
-        
-        data_tot_wide_cats = pd.get_dummies(data_tot[cats], drop_first=True)
-        data_tot_wide = pd.concat([data_tot[nums], data_tot_wide_cats], axis=1)
-        data_norm = data_tot_wide / np.max(data_tot_wide, axis=0)
-        data_norm_in = data_norm[data_norm.futuro == 0]
-        data_norm_in = data_norm_in.drop(['futuro'], axis=1)
-        X_in_cols = data_norm_in.columns
-        data_y = pd.factorize(data.out)
-        y_cats = data_y[1]
-        X_in = np.array(data_norm_in, dtype='float64')
-        y_in = np.array(data_y[0], dtype='float32').reshape(-1,1)
-       
-        return X_in, y_in, X_in_cols, y_cats, unicos
-    
     st.subheader('Datos de Entrenamiento')
-    
-    X_in, y_in, X_in_cols, y_cats, unicos = prep_data_nn(data, data_fut)
+
+    X_in, y_in, X_in_cols, y_cats, unicos, cats, nums = prep_data_nn(data, data_fut)
+
+    st.write(tuple(cats))
+    option = st.selectbox('Opción: ', tuple(cats))
+ 
+    st.bar_chart(data[option].value_counts(), width=500, use_container_width=False)
     
     st.write('Geometría de Data X: ', X_in.shape)
     st.write('Geometría de Data y: ', y_in.shape)
