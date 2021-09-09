@@ -157,3 +157,10 @@ if file is not None:
     fig = px.parallel_coordinates(df4)
     fig.update_layout(width=800)
     st.write(fig)
+    
+    csv = dataxa2.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
+    href = f'<a href="data:file/csv;base64,{b64}" download="data_predicciones.csv">Descargar Archivo</a>'
+    
+    st.write('Archivo con predicciones: ')
+    st.markdown(href, unsafe_allow_html=True)
