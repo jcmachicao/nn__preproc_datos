@@ -5,8 +5,8 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import base64
-from sklearn.preprocessing import MinMaxScaler
 
+from sklearn.preprocessing import MinMaxScaler
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
