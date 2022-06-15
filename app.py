@@ -50,23 +50,24 @@ def prep_data_nn(data, cols):
      
     return data_tot, unicos, cats_dums
 
-class NetClas(nn.Module):
+# Arquitectura
+
+class Net(nn.Module):
 
   def __init__(self):
-    super(NetClas, self).__init__()
-    in_items = 35
-    out_cats = 2
-    self.fc1 = nn.Linear(in_items, 512)
+    super(Net, self).__init__()
+    self.fc1 = nn.Linear(n_cols, 512)
     self.fc2 = nn.Linear(512, 256)
     self.fc3 = nn.Linear(256, 32)
-    self.fc4 = nn.Linear(32, out_cats)
+    self.fc4 = nn.Linear(32, n_cats)
     self.dp1 = nn.Dropout(0.15)
 
   def forward(self, x):
     x = F.relu(self.fc1(x))
-    x = F.relu(self.fc2(x))
-    x = F.relu(self.fc3(x))
+    x = self.dp1(F.relu(self.fc2(x)))
+    x = self.dp1(F.relu(self.fc3(x)))
     x = self.fc4(x)
+
     return F.log_softmax(x, dim=1)
 
 # OPERACIONES
@@ -80,13 +81,15 @@ if file is not None:
     
     st.subheader('Conversión para Entrenamiento')
     
-    colsx = pd.read_excel('cols_ofic.xlsx')
-    colsb = list(colsx['cols_ofic_wide'].dropna())
+    #colsx = pd.read_excel('cols_ofic.xlsx')
+    #colsb = list(colsx['cols_ofic_wide'].dropna())
     
-    data_X, unicos, cats_dums = prep_data_nn(dataxb, colsb)
+    colsb = list(dataxb.columns)
+    
+    #data_X, unicos, cats_dums = prep_data_nn(dataxb, colsb)
 
     st.write('Geometría de Data_X: ', data_X.shape)
-    st.write(tuple(cats_dums))
+    #st.write(tuple(cats_dums))
 
     st.subheader('Visualización')
 
