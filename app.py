@@ -135,7 +135,7 @@ if file is not None:
     
     # Arquitectura
     model = NetClas()
-    nom_model = 'modelo.pth'
+    nom_model = 'modelo_RET01.pth'
     modelo_load = nom_model
     model.load_state_dict(torch.load(modelo_load, map_location=torch.device('cpu')))
     output = model(torch.tensor(X_ts).float())
