@@ -76,7 +76,7 @@ file = st.file_uploader('Seleccione un archivo: ')
 
 if file is not None: 
     
-    dataxb = pd.read_excel(file, sheet_name='data_testing')
+    dataxb = pd.read_excel(file, sheet_name='test_x')
     st.write('Filas, Columnas de Data de Entrenamiento: ', dataxb.shape)
     
     st.subheader('Conversión para Entrenamiento')
