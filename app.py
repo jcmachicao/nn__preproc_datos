@@ -88,7 +88,7 @@ if file is not None:
     
     #data_X, unicos, cats_dums = prep_data_nn(dataxb, colsb)
 
-    st.write('Geometría de Data_X: ', data_X.shape)
+    st.write('Geometría de Data: ', dataxb.shape)
     #st.write(tuple(cats_dums))
 
     st.subheader('Visualización')
