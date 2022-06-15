@@ -5,6 +5,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import base64
+from sklearn.preprocessing import MinMaxScaler
 
 import torch
 import torch.nn as nn
@@ -101,39 +102,15 @@ if file is not None:
     fig.update_layout(width=800)
     st.write(fig)
 
-    #st.write('Valores únicos de variables categóricas: ', unicos)
-    st.write('Columnas identificadas para X con dummies: ', len(data_X.columns))
-    cols_orig = colsx.cols_ofic_orig.dropna()
-    st.write('Columnas de base original: ', len(cols_orig))
-    
-    st.write('Haciendo compatibilización...')
-    data_X_tot = pd.DataFrame()
-    for col in cols_orig:
-        if col in list(data_X.columns):
-            data_X_tot[col] = data_X[col]
-        else:
-            data_X_tot[col] = 0
-    st.write(data_X_tot.shape)
-    st.write(data_X.columns)
-    
-    data_X_tot.shape[1] == len(cols_orig)
-    
+    st.write('Columnas identificadas para X con dummies: ', len(dataxb.columns))
     st.write('... Confirmado, listo para testing.')
-    
-    st.subheader('Descarga Validada')
-    st.write('Con estos archivos ya es posible entrenar la red neuronal. Los archivos pueden descargarse abajo. Muchas gracias.')
-
-    csv = data_X_tot.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    href = f'<a href="data:file/csv;base64,{b64}" download="data_testing_in.csv">Descargar Archivo</a>'
-    
     st.write('Archivo data lista para testing: ')
     st.markdown(href, unsafe_allow_html=True)
 
-    st.subheader('Generación de Predicciones con Data_X')
-    max_base = np.load('mx_base.npy')
-    st.write('Filas, Columnas de Maximos: ', max_base.shape)
-    X_ts = np.array(data_X_tot) / max_base    
+    st.subheader('Generación de Predicciones con Data')
+    mms = MinMaxScaler()
+    data_np_01 = mms.fit_transform(data_np)
+    X_ts = data_np_01
     st.write(X_ts.shape)
     
     # Arquitectura
@@ -154,7 +131,6 @@ if file is not None:
     dataxa2 = dataxa[dataxa.y_hat==op_pred]
     st.write(dataxa2.shape)
     st.write('Ratio Resultado Positivo: ', round(len(dataxa2)/len(dataxa),2))
-    dataxa2
     
     df4 = dataxa2
     fig = px.parallel_coordinates(df4)
