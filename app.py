@@ -82,9 +82,6 @@ if file is not None:
     
     st.subheader('Conversión para Entrenamiento')
     
-    #colsx = pd.read_excel('cols_ofic.xlsx')
-    #colsb = list(colsx['cols_ofic_wide'].dropna())
-    
     colsb = list(dataxb.columns)
     
     #data_X, unicos, cats_dums = prep_data_nn(dataxb, colsb)
